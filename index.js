@@ -11,10 +11,12 @@ const PORT = process.env.PORT || port;
 const AuthorizationRoutes = require("./authorization/routes");
 const UserRoutes = require("./users/routes");
 const ProductRoutes = require("./products/routes");
+const TransactionRoutes = require("./transactions/routes");
 
 // Sequelize model imports
 const UserModel = require("./common/models/User");
 const ProductModel = require("./common/models/Product");
+const TransactionModel = require("./common/models/Transaction");
 
 app.use(morgan("tiny"));
 app.use(cors());
@@ -31,6 +33,7 @@ const sequelize = new Sequelize({
 // Initialising the Model on sequelize
 UserModel.initialise(sequelize);
 ProductModel.initialise(sequelize);
+TransactionModel.initialise(sequelize);
 
 // Syncing the models that are defined on sequelize with the tables that alredy exists
 // in the database. It creates models as tables that do not exist in the DB.
@@ -43,6 +46,7 @@ sequelize
     app.use("/", AuthorizationRoutes);
     app.use("/user", UserRoutes);
     app.use("/product", ProductRoutes);
+    app.use("/transaction", TransactionRoutes);
 
     app.listen(PORT, () => {
       console.log("Server Listening on PORT:", port);

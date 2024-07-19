@@ -5,7 +5,7 @@ module.exports = {
   check: (req, res, next) => {
     const authHeader = req.headers['authorization'];
 
-    // IF no auth headers are provided
+/*     // IF no auth headers are provided
     // THEN return 401 Unauthorized error
     if (!authHeader) {
       return res.status(401).json({
@@ -50,6 +50,6 @@ module.exports = {
 
       req.user = user; // Save the user object for further use
       next();
-    });
-  }
+    });*/
+  } 
 }
