@@ -26,7 +26,7 @@ module.exports = {
       type: "string",
     },
     closeDate: {
-      type: "string",
+        type: "string" | null
     },
   },
   required: ["ticker", "type", "strike", "expiration", "side", "quantity", "premium", "openDate"],

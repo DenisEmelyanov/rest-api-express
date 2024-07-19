@@ -40,9 +40,10 @@ module.exports = {
   },
 
   createTransaction: (req, res) => {
-    const { body } = req;
+    const { body: payload } = req;
+    console.warn("body: " + Object.keys(payload));
 
-    TransactionModel.createTransaction(body)
+    TransactionModel.createTransaction(payload)
       .then((transaction) => {
         return res.status(200).json({
           status: true,
@@ -62,6 +63,9 @@ module.exports = {
       params: { transactionId },
       body: payload,
     } = req;
+
+    console.warn("body: " + payload);
+    console.warn(Object.keys(payload));
 
     // IF the payload does not have any keys,
     // THEN we can return an error, as nothing can be updated

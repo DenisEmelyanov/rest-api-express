@@ -1,3 +1,4 @@
+
 module.exports = {
   type: "object",
   properties: {
@@ -11,7 +12,7 @@ module.exports = {
       type: "number",
     },
     expiration: {
-      type: "date",
+      type: "string"
     },
     side: {
       type: "string",
@@ -23,10 +24,10 @@ module.exports = {
       type: "number",
     },
     openDate: {
-      type: "date",
+      type: "string"
     },
     closeDate: {
-      type: "date",
+      type: "string" | null
     },
   },
   additionalProperties: false,
