@@ -1,4 +1,4 @@
-# E-Commerce Store with NodeJS
+# RESTFul API with NodeJS
 
 This is an Express service that provides authorization functionality and includes separate folders for users and products.
 It also uses Sequelize ORM with SQLite as the database, along with the JSON Web Token (JWT) and AJV libraries.
