@@ -12,6 +12,7 @@ module.exports = {
     },
     expiration: {
       type: "string",
+      //format: "date"
     },
     side: {
       type: "string",
@@ -24,9 +25,11 @@ module.exports = {
     },
     openDate: {
       type: "string",
+      //format: "date"
     },
     closeDate: {
-        type: "string"
+      type: ["string", "null"],
+      //format: "date"
     },
   },
   required: ["ticker", "type", "strike", "expiration", "side", "quantity", "premium", "openDate"],

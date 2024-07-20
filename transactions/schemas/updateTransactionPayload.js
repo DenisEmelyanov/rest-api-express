@@ -1,3 +1,4 @@
+const { format } = require("morgan");
 
 module.exports = {
   type: "object",
@@ -12,7 +13,8 @@ module.exports = {
       type: "number",
     },
     expiration: {
-      type: "string"
+      type: "string",
+      //format: "date"
     },
     side: {
       type: "string",
@@ -24,10 +26,12 @@ module.exports = {
       type: "number",
     },
     openDate: {
-      type: "string"
+      type: "string",
+      //format: "date"
     },
     closeDate: {
-      type: "string"
+      type: ["string", "null"],
+      //format: "date"
     },
   },
   required: ["ticker", "type", "strike", "expiration", "side", "quantity", "premium", "openDate"],
