@@ -11,14 +11,14 @@ module.exports = {
       enum: ["call", "put", "stock", "interest", "dividend"]
     },
     strike: {
-      type: "number",
+      type: ["number", "null"]
     },
     expiration: {
-      type: "string",
+      type: ["string", "null"],
       //format: "date"
     },
     side: {
-      type: "string",
+      type: ["string", "null"],
     },
     quantity: {
       type: "number",
