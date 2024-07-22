@@ -8,7 +8,7 @@ const TransactionModel = {
   },
   ticker: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   type: {
     type: DataTypes.STRING,
@@ -16,19 +16,19 @@ const TransactionModel = {
   },
   strike: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true
   },
   expiration: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   side: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   quantity: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true
   },
   premium: {
     type: DataTypes.INTEGER,

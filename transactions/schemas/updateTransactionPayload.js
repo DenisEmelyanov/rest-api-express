@@ -8,6 +8,7 @@ module.exports = {
     },
     type: {
       type: "string",
+      enum: ["call", "put", "stock", "interest", "dividend"]
     },
     strike: {
       type: "number",
@@ -34,6 +35,6 @@ module.exports = {
       //format: "date"
     },
   },
-  required: ["ticker", "type", "strike", "expiration", "side", "quantity", "premium", "openDate"],
+  required: ["ticker", "type", "premium", "openDate"],
   additionalProperties: false,
 };
