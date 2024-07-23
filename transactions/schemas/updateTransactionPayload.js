@@ -34,7 +34,10 @@ module.exports = {
       type: ["string", "null"],
       //format: "date"
     },
+    assigned: {
+      type: "boolean"
+    }
   },
-  required: ["ticker", "type", "premium", "openDate"],
+  required: ["ticker", "type", "premium", "openDate", "assigned"],
   additionalProperties: false,
 };

@@ -41,6 +41,10 @@ const TransactionModel = {
   closeDate: {
     type: DataTypes.DATEONLY,
     allowNull: true
+  },
+  assigned: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false
   }  
 };
 
