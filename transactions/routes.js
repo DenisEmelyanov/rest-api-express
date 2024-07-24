@@ -20,6 +20,12 @@ router.get(
 );
 
 router.get(
+    "/tickers",
+    //[isAuthenticatedMiddleware.check],
+    TransactionController.getAllTickers
+  );
+
+router.get(
   "/:transactionId",
   //[isAuthenticatedMiddleware.check],
   TransactionController.getTransactionById

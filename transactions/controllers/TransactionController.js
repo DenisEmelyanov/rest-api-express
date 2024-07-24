@@ -19,6 +19,33 @@ module.exports = {
       });
   },
 
+  getAllTickers: (req, res) => {
+    const { query: filters } = req;
+
+    TransactionModel.findAllTransactionTickers(filters)
+      .then((transactions) => {
+        //console.log(transactions);
+        const tickers = [];
+        for (const transaction of transactions) {
+          tickers.push(transaction.dataValues.ticker);
+        }
+        const uniqueTickers = new Set(tickers);
+        const uniqueTickersArray = Array.from(uniqueTickers);
+        console.log(uniqueTickersArray);
+
+        return res.status(200).json({
+          status: true,
+          data: uniqueTickersArray,
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+  },
+
   getTransactionById: (req, res) => {
     const {
       params: { transactionId },
@@ -102,7 +129,7 @@ module.exports = {
       params: { transactionId },
     } = req;
 
-    TransactionModel.deleteTransaction({id: transactionId})
+    TransactionModel.deleteTransaction({ id: transactionId })
       .then((numberOfEntriesDeleted) => {
         return res.status(200).json({
           status: true,
