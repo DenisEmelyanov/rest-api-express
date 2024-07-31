@@ -46,6 +46,33 @@ module.exports = {
       });
   },
 
+  getAllYears: (req, res) => {
+    const { query: filters } = req;
+
+    TransactionModel.findAllTransactionYears(filters)
+      .then((transactions) => {
+        //console.log(transactions);
+        const years = [];
+        for (const transaction of transactions) {
+          years.push(transaction.dataValues.year);
+        }
+        const uniqueYears = new Set(years);
+        const uniqueYearsArray = Array.from(uniqueYears);
+        console.log(uniqueYearsArray);
+
+        return res.status(200).json({
+          status: true,
+          data: uniqueYearsArray,
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+  },
+
   getTransactionById: (req, res) => {
     const {
       params: { transactionId },

@@ -25,6 +25,12 @@ router.get(
     TransactionController.getAllTickers
   );
 
+  router.get(
+    "/years",
+    //[isAuthenticatedMiddleware.check],
+    TransactionController.getAllYears
+  );
+
 router.get(
   "/:transactionId",
   //[isAuthenticatedMiddleware.check],
