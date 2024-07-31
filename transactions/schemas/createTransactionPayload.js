@@ -1,41 +1,50 @@
 module.exports = {
-  type: "object",
-  properties: {
-    ticker: {
-      type: "string",
+    type: "object",
+    properties: {
+        ticker: {
+            type: "string",
+        },
+        portfolio: {
+            type: "string",
+        },
+        group: {
+            type: ["string", "null"],
+        },
+        type: {
+            type: "string",
+            enum: ["call", "put", "stock", "interest", "dividend"]
+        },
+        strike: {
+            type: ["number", "null"]
+        },
+        expiration: {
+            type: ["string", "null"],
+            //format: "date"
+        },
+        side: {
+            type: "string",
+        },
+        quantity: {
+            type: "number",
+        },
+        premium: {
+            type: "number",
+        },
+        openDate: {
+            type: "string",
+            //format: "date"
+        },
+        closeDate: {
+            type: ["string", "null"],
+            //format: "date"
+        },
+        year: {
+            type: "number",
+        },
+        assigned: {
+            type: "boolean"
+        }
     },
-    type: {
-      type: "string",
-      enum: ["call", "put", "stock", "interest", "dividend"]
-    },
-    strike: {
-      type: ["number", "null"]
-    },
-    expiration: {
-      type: ["string", "null"],
-      //format: "date"
-    },
-    side: {
-      type: "string",
-    },
-    quantity: {
-      type: "number",
-    },
-    premium: {
-      type: "number",
-    },
-    openDate: {
-      type: "string",
-      //format: "date"
-    },
-    closeDate: {
-      type: ["string", "null"],
-      //format: "date"
-    },
-    assigned: {
-        type: "boolean"
-    }
-  },
-  required: ["ticker", "type", "premium", "openDate", "assigned"],
-  additionalProperties: false,
+    required: ["portfolio", "ticker", "type", "premium", "openDate", "year", "assigned"],
+    additionalProperties: false,
 };

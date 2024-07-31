@@ -6,6 +6,14 @@ const TransactionModel = {
         autoIncrement: true,
         primaryKey: true,
     },
+    portfolio: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    group: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     ticker: {
         type: DataTypes.STRING,
         allowNull: true
@@ -41,6 +49,10 @@ const TransactionModel = {
     closeDate: {
         type: DataTypes.DATEONLY,
         allowNull: true
+    },
+    year: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     assigned: {
         type: DataTypes.BOOLEAN,

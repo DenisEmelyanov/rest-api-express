@@ -6,6 +6,12 @@ module.exports = {
     ticker: {
       type: "string",
     },
+    portfolio: {
+      type: "string",
+    },
+    group: {
+      type: ["string", "null"],
+    },
     type: {
       type: "string",
       enum: ["call", "put", "stock", "interest", "dividend"]
@@ -34,10 +40,13 @@ module.exports = {
       type: ["string", "null"],
       //format: "date"
     },
+    year: {
+      type: "number",
+    },
     assigned: {
       type: "boolean"
     }
   },
-  required: ["ticker", "type", "premium", "openDate", "assigned"],
+  required: ["portfolio", "ticker", "type", "premium", "openDate", "year", "assigned"],
   additionalProperties: false,
 };
