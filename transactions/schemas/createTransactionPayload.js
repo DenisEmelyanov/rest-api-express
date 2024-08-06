@@ -21,14 +21,23 @@ module.exports = {
             type: ["string", "null"],
             //format: "date"
         },
-        side: {
-            type: "string",
+        openSide: {
+            type: ["string", "null"]
+        },
+        closeSide: {
+            type: ["string", "null"]
         },
         quantity: {
             type: "number",
         },
         premium: {
             type: "number",
+        },
+        openAmount: {
+            type: ["number", "null"],
+        },
+        closeAmount: {
+            type: ["number", "null"],
         },
         openDate: {
             type: "string",

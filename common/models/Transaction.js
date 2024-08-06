@@ -30,7 +30,11 @@ const TransactionModel = {
         type: DataTypes.DATEONLY,
         allowNull: true,
     },
-    side: {
+    openSide: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    closeSide: {
         type: DataTypes.STRING,
         allowNull: true,
     },
@@ -41,6 +45,14 @@ const TransactionModel = {
     premium: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    openAmount: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    closeAmount: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     openDate: {
         type: DataTypes.DATEONLY,
