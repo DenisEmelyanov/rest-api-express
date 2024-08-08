@@ -57,5 +57,5 @@ module.exports = {
     }
   },
   required: ["portfolio", "ticker", "type", "premium", "openDate", "year", "assigned"],
-  additionalProperties: false,
+  additionalProperties: true,
 };
