@@ -109,6 +109,16 @@ module.exports = {
         return transactions;//.map(transaction => transaction.ticker);  // Extract ticker values
     },
 
+    findAllTransactionGroups: (query) => {
+        const transactions = this.model.findAll({
+            attributes: ['group'],  // Select only the 'group' attribute
+            distinct: true,         // Specify DISTINCT to retrieve unique values - DOES NOT WORK
+            where: query             // Optional: Apply additional filtering using 'query'
+        });
+
+        return transactions;//.map(transaction => transaction.ticker);  // Extract ticker values
+    },
+
     findAllTransactionYears: (query) => {
         const transactions = this.model.findAll({
             attributes: ['year'],  // Select only the 'ticker' attribute

@@ -20,16 +20,22 @@ router.get(
 );
 
 router.get(
-    "/tickers",
-    //[isAuthenticatedMiddleware.check],
-    TransactionController.getAllTickers
-  );
+  "/tickers",
+  //[isAuthenticatedMiddleware.check],
+  TransactionController.getAllTickers
+);
 
-  router.get(
-    "/years",
-    //[isAuthenticatedMiddleware.check],
-    TransactionController.getAllYears
-  );
+router.get(
+  "/groups",
+  //[isAuthenticatedMiddleware.check],
+  TransactionController.getAllGroups
+);
+
+router.get(
+  "/years",
+  //[isAuthenticatedMiddleware.check],
+  TransactionController.getAllYears
+);
 
 router.get(
   "/:transactionId",

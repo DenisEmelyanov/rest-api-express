@@ -46,6 +46,33 @@ module.exports = {
       });
   },
 
+  getAllGroups: (req, res) => {
+    const { query: filters } = req;
+
+    TransactionModel.findAllTransactionGroups(filters)
+      .then((transactions) => {
+        //console.log(transactions);
+        const groups = [];
+        for (const transaction of transactions) {
+          groups.push(transaction.dataValues.group);
+        }
+        const uniqueGroups = new Set(groups);
+        const uniqueGroupsArray = Array.from(uniqueGroups);
+        console.log(uniqueGroupsArray);
+
+        return res.status(200).json({
+          status: true,
+          data: uniqueGroupsArray,
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+  },
+
   getAllYears: (req, res) => {
     const { query: filters } = req;
 
