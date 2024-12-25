@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Op } = require("sequelize");
 
 const QuoteModel = {
     // id: {
@@ -44,6 +44,7 @@ module.exports = {
     },
 
     createQuote: (quote) => {
+        console.log('save quote:');
         console.log(quote);
         return this.model.create(quote);
     },
@@ -63,6 +64,17 @@ module.exports = {
     findAllQuotes: (query) => {
         return this.model.findAll({
             where: query
+        });
+    },
+
+    findAllQuotesBetweenDates: (startDate, endDate, otherQueries = {}) => {
+        return this.model.findAll({
+            where: {
+                ...otherQueries, // Include other queries if needed
+                date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            }
         });
     },
 
