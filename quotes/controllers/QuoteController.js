@@ -15,31 +15,36 @@ module.exports = {
     const { query: filters } = req;
 
     if (filters.startDate === undefined && filters.endDate === undefined) {
-      QuoteModel.findAllQuotes(filters)
+      const { date, ...otherFilters } = filters;
+      // find last working day
+      const currentDate = getLastWorkingDay(date);
+      console.warn("last working day: " + currentDate);
+      // chceck if the date is in DB
+      QuoteModel.findAllQuotes(format(currentDate, 'yyyy-MM-dd'), otherFilters)
         .then(async (quotes) => {
           // check if quote is found in DB
           if (quotes.length === 0) {
-            
+
             try {
               // use date + 1 as period2
-              const currentDate = parseISO(filters.date);
+
               const nextDate = addDays(currentDate, 1);
               const nextFormattedDate = format(nextDate, 'yyyy-MM-dd');
-              console.warn("not found: " + filters.ticker + " " + filters.date + " " + nextFormattedDate);
+              console.warn("not found: " + filters.ticker + " " + date + " -> " + currentDate + " & " + nextFormattedDate);
 
-              const result = await getYahooFinanceResult(filters.ticker, filters.date, nextFormattedDate);
+              const result = await getYahooFinanceResult(filters.ticker, currentDate, nextFormattedDate);
               console.warn(result);
 
               if (result && result.quotes.length > 0) {
-                
+
                 const payload = saveQuotesInDB(result, quotes);
                 return res.status(200).json({
                   status: true,
-                  data: [payload]
+                  data: payload
                 });
 
               } else {
-                console.log(`Could not retrieve historical data for ${filters.ticker} on ${filters.date}`);
+                console.log(`Could not retrieve historical data for ${filters.ticker} on ${currentDate}`);
                 return res.status(404).json({
                   status: false,
                   data: quotes,
@@ -75,17 +80,28 @@ module.exports = {
         .then(async (quotes) => {
           // compare the length of the quote array to determine if all quote are found in DB
           const workingDays = getWorkingDaysBetweenDates(startDate, endDate);
-          console.log(quotes.length + " <---> " + workingDays);
+          console.log(startDate + " " + endDate);
+          console.log("DB quotes: " + quotes.length + " <---> working days: " + workingDays);
 
-          if (quotes.length !== workingDays) {
-            const result = await getYahooFinanceResult(otherFilters.ticker, startDate, endDate);
-            console.warn(result);
+          // if the number of working days is greater than the number of quotes in the DB
+          if (workingDays - quotes.length > 1) {
+            const currentEndDate = parseISO(endDate);
+            const nextEndDate = addDays(currentEndDate, 1);
+            const nextFormattedEndDate = format(nextEndDate, 'yyyy-MM-dd');
 
-            const payload = saveQuotesInDB(result, quotes);
-            return res.status(200).json({
-              status: true,
-              data: [payload]
-            });
+            // TODO
+            const enable = true;
+            if (enable) {
+              const result = await getYahooFinanceResult(otherFilters.ticker, startDate, nextFormattedEndDate);
+              console.warn(result);
+
+              const payload = saveQuotesInDB(result, quotes);
+
+              return res.status(200).json({
+                status: true,
+                data: payload
+              });
+            }
           }
 
           return res.status(200).json({
@@ -320,7 +336,7 @@ function saveQuotesInDB(result, existingQuotes) {
         volume: quote.volume
       };
       console.log(payloadItem);
-  
+
       QuoteModel.createQuote(payloadItem);
       payload.push(payloadItem);
     } else {
@@ -336,15 +352,15 @@ function getWorkingDaysBetweenDates(startDateStr, endDateStr) {
   try {
     const startDate = parseISO(startDateStr);
     const endDate = parseISO(endDateStr);
-  
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new Error("Invalid date format. Please use yyyy-MM-dd.");
     }
-  
+
     if (endDate < startDate) {
       throw new Error("End date cannot be before start date.");
     }
-  
+
     const allDays = eachDayOfInterval({ start: startDate, end: endDate });
     console.log(allDays);
 
@@ -375,4 +391,20 @@ function isHoliday(date) {
   const monthDay = format(date, 'MM-dd');
   //console.log(monthDay + " " + holidays.hasOwnProperty(monthDay));
   return holidays.hasOwnProperty(monthDay);
+}
+
+function getLastWorkingDay(startDate) {
+
+  let currentDate = parseISO(startDate);
+
+  for (let i = 1; i <= 7; i++) { // Check up to 7 days back (a full week)
+    const previousDate = addDays(currentDate, -1);
+
+    if (!isWeekend(previousDate) && !isHoliday(previousDate)) {
+      return previousDate;
+    }
+    currentDate = previousDate;
+  }
+
+  return null; // No working day found within the last week (unlikely, but possible with unusual holiday schedules)
 }

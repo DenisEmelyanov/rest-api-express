@@ -61,9 +61,14 @@ module.exports = {
         });
     },
 
-    findAllQuotes: (query) => {
+    findAllQuotes: (specificDate, otherQueries = {}) => {
         return this.model.findAll({
-            where: query
+            where: {
+                ...otherQueries,
+                date: {
+                    [Op.eq]: specificDate // Use Op.eq for equality
+                }
+            }
         });
     },
 

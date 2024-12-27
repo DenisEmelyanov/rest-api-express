@@ -18,7 +18,7 @@
     "morgan": "1.10.0",
     "sequelize": "6.31.1",
     "sqlite3": "^5.1.6",
-    "yahoo-finance2": "^2.13.2"
+    "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {
     "prettier": "2.8.8"
