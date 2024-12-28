@@ -1,3 +1,4 @@
+const { ca, el } = require("date-fns/locale");
 const QuoteModel = require("../../common/models/Quote");
 const yahooFinance = require('yahoo-finance2').default;
 const dateFns = require('date-fns');
@@ -90,7 +91,7 @@ module.exports = {
             const nextFormattedEndDate = format(nextEndDate, 'yyyy-MM-dd');
 
             // TODO
-            const enable = true;
+            const enable = false;
             if (enable) {
               const result = await getYahooFinanceResult(otherFilters.ticker, startDate, nextFormattedEndDate);
               console.warn(result);
@@ -118,6 +119,52 @@ module.exports = {
     }
 
 
+  },
+
+  getPredictedQuote: (req, res) => {
+    const { query: filters } = req;
+    const { v, k, startDate, endDate, ...otherFilters } = filters;
+
+      QuoteModel.findAllQuotesBetweenDates(startDate, endDate, otherFilters)
+      .then((quotes) => {
+        const trainingSet = [];
+        for (const quote of quotes) {
+          trainingSet.push({
+            open: quote.open,
+            close: quote.close,
+            high: quote.high,
+            low: quote.low,
+            volume: quote.volume
+          });
+        }
+
+        console.log("traning set: " + trainingSet.length);
+        try {
+          let predictedNextClose = -1;
+          if (v === '2') {
+            predictedNextClose = knnPredictNextCloseWeighted(trainingSet, k);
+          } else { 
+            predictedNextClose = knnPredictNextClose(trainingSet, k);
+          }
+          console.log(predictedNextClose);
+
+          return res.status(200).json({
+            status: true,
+            data: predictedNextClose,
+          });
+        } catch (error) {
+          return res.status(500).json({
+            status: false,
+            error: error,
+          });
+        }
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
   },
 
 
@@ -326,7 +373,7 @@ function saveQuotesInDB(result, existingQuotes) {
     );
 
     if (!existingQuote) {
-      const payloadItem = {
+      const payloadCreateItem = {
         ticker: ticker,
         date: dateStr,
         open: quote.open,
@@ -335,13 +382,23 @@ function saveQuotesInDB(result, existingQuotes) {
         low: quote.low,
         volume: quote.volume
       };
-      console.log(payloadItem);
+      console.log(payloadCreateItem);
 
-      QuoteModel.createQuote(payloadItem);
-      payload.push(payloadItem);
+      QuoteModel.createQuote(payloadCreateItem);
+      payload.push(payloadCreateItem);
     } else {
       console.log(`Quote already exists in DB: ${ticker} - ${dateStr}`);
-      payload.push(existingQuote);
+
+      const payloadUpdateItem = { 
+        open: quote.open,
+        close: quote.close,
+        high: quote.high,
+        low: quote.low,
+        volume: quote.volume
+      };
+      QuoteModel.updateQuote({ ticker: ticker, date: dateStr }, payloadUpdateItem);
+      const payloadPushItem = { ticker: ticker, date: dateStr, ...payloadUpdateItem };
+      payload.push(payloadPushItem);
     }
   }
 
@@ -407,4 +464,92 @@ function getLastWorkingDay(startDate) {
   }
 
   return null; // No working day found within the last week (unlikely, but possible with unusual holiday schedules)
+}
+
+function euclideanDistance(p1, p2) {
+  return Math.sqrt(
+    Math.pow(p1.open - p2.open, 2) +
+    Math.pow(p1.low - p2.low, 2) +
+    Math.pow(p1.high - p2.high, 2) +
+    Math.pow(p1.close - p2.close, 2) +
+    Math.pow(p1.volume - p2.volume, 2)
+  );
+}
+
+function knnPredictNextClose(trainingSet, k) {
+  if (!trainingSet || trainingSet.length < 2 || !k || k <= 0 || k >= trainingSet.length) {
+    console.error("Invalid input data. Training set must have at least 2 points, and k must be a valid value.");
+    return null;
+  }
+
+  const lastPoint = trainingSet[trainingSet.length - 1];
+  const newPoint = {
+      open: lastPoint.close,
+      low: lastPoint.low,
+      high: lastPoint.high,
+      volume: lastPoint.volume
+  }
+
+  const distances = trainingSet.slice(0, trainingSet.length - 1).map((point) => ({
+    distance: euclideanDistance(point, { ...newPoint, close: point.close }),
+    close: point.close,
+  }));
+
+  distances.sort((a, b) => a.distance - b.distance);
+
+  const nearestNeighbors = distances.slice(0, k);
+
+    if (nearestNeighbors.length === 0) {
+        console.error("No nearest neighbors found");
+        return null;
+    }
+
+  const predictedClose =
+    nearestNeighbors.reduce((sum, neighbor) => sum + neighbor.close, 0) / k;
+
+  return predictedClose;
+}
+
+function knnPredictNextCloseWeighted(trainingSet, k) {
+  if (!trainingSet || trainingSet.length < 2 || !k || k <= 0 || k >= trainingSet.length) {
+    console.error("Invalid input data. Training set must have at least 2 points, and k must be a valid value.");
+    return null;
+  }
+
+    const lastPoint = trainingSet[trainingSet.length - 1];
+    const newPoint = {
+        open: lastPoint.close,
+        low: lastPoint.low,
+        high: lastPoint.high,
+        volume: lastPoint.volume
+    }
+
+  const distances = trainingSet.slice(0, trainingSet.length - 1).map((point) => ({
+    distance: euclideanDistance(point, { ...newPoint, close: point.close }),
+    close: point.close,
+  }));
+
+  distances.sort((a, b) => a.distance - b.distance);
+
+  const nearestNeighbors = distances.slice(0, k);
+
+    if (nearestNeighbors.length === 0) {
+        console.error("No nearest neighbors found");
+        return null;
+    }
+
+  // Weighted average calculation
+  let weightedSum = 0;
+  let totalWeight = 0;
+
+  nearestNeighbors.forEach(neighbor => {
+      //Inverse of distance as weight. If distance is 0 use 1 as weight
+      const weight = neighbor.distance === 0 ? 1 : 1 / neighbor.distance;
+      weightedSum += neighbor.close * weight;
+      totalWeight += weight;
+  });
+
+  const predictedClose = weightedSum / totalWeight;
+
+  return predictedClose;
 }

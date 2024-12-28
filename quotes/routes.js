@@ -19,11 +19,11 @@ router.get(
    QuoteController.getAllQuotes
  );
 
-// router.get(
-//   "/tickers",
-//   //[isAuthenticatedMiddleware.check],
-//   TransactionController.getAllTickers
-// );
+router.get(
+   "/knn",
+   //[isAuthenticatedMiddleware.check],
+   QuoteController.getPredictedQuote
+ );
 
 // router.get(
 //   "/groups",

@@ -56,6 +56,8 @@ module.exports = {
     },
 
     updateQuote: (query, updatedValue) => {
+        console.log('update quote:');
+        console.log(query);
         return this.model.update(updatedValue, {
             where: query,
         });
