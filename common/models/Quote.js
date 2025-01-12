@@ -49,6 +49,19 @@ module.exports = {
         return this.model.create(quote);
     },
 
+    findLatestQuote: (ticker) => {
+        console.log('find latest quote:');
+        console.log(ticker);
+        return this.model.findOne({
+            where: {
+                ticker: {
+                    [Op.eq]: ticker // Use Op.eq for equality
+                }
+            },
+            order: [['date', 'DESC']], // Order by date descending to get the latest
+        });
+    },
+
     findQuote: (query) => {
         return this.model.findOne({
             where: query,

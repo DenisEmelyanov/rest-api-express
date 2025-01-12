@@ -271,6 +271,25 @@ module.exports = {
       });
   },
 
+  getLatestQuote: (req, res) => {
+    const { query: filters } = req;
+    const { ticker } = filters;
+
+    QuoteModel.findLatestQuote(ticker)
+      .then((quote) => {
+        return res.status(200).json({
+          status: true,
+          data: quote.toJSON(),
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+  },
+
   createQuote: (req, res) => {
     const { body: payload } = req;
     console.warn(Object.keys(payload));
@@ -384,7 +403,12 @@ function saveQuotesInDB(result, existingQuotes) {
       };
       console.log(payloadCreateItem);
 
-      QuoteModel.createQuote(payloadCreateItem);
+      try {
+        QuoteModel.createQuote(payloadCreateItem);
+      } catch (error) {
+        console.error("Error saving quote to DB:", error.message);
+      }
+      // QuoteModel.createQuote(payloadCreateItem);
       payload.push(payloadCreateItem);
     } else {
       console.log(`Quote already exists in DB: ${ticker} - ${dateStr}`);

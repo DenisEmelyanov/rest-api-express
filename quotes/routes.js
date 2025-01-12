@@ -38,9 +38,9 @@ router.get(
 // );
 
 router.get(
-  "/:ticker/:date",
+  "/latest",
   //[isAuthenticatedMiddleware.check],
-  QuoteController.getQuoteByDate
+  QuoteController.getLatestQuote
 );
 
 router.post(
