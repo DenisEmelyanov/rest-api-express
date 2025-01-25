@@ -19,6 +19,45 @@ module.exports = {
       });
   },
 
+  getAllTransactionsByMonth: (req, res) => {
+    //return all transactions for a given month and year in openDate and closeDate
+    const { query: filters } = req;
+    const { year, month, ...otherFilters } = filters;
+
+    if (month === undefined) {
+      //transaction/month?year=2025
+      TransactionModel.findAllTransactionsByYear(year, otherFilters)
+      .then((transactions) => {
+        return res.status(200).json({
+          status: true,
+          data: transactions,
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+    }
+    else {
+      //transaction/?year=2024&month=1
+      TransactionModel.findAllTransactionsByMonth(year, month, otherFilters)
+      .then((transactions) => {
+        return res.status(200).json({
+          status: true,
+          data: transactions,
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+    }
+  },
+
   getAllTickers: (req, res) => {
     const { query: filters } = req;
 

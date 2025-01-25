@@ -82,16 +82,17 @@ module.exports = {
           // compare the length of the quote array to determine if all quote are found in DB
           const workingDays = getWorkingDaysBetweenDates(startDate, endDate);
           console.log(startDate + " " + endDate);
-          console.log("DB quotes: " + quotes.length + " <---> working days: " + workingDays);
+          const diff = workingDays - quotes.length;
+          console.log("DB quotes: " + quotes.length + " <---> working days: " + workingDays + " (" + diff + ")");
 
           // if the number of working days is greater than the number of quotes in the DB
-          if (workingDays - quotes.length > 1) {
+          if (diff > 0) {
             const currentEndDate = parseISO(endDate);
             const nextEndDate = addDays(currentEndDate, 1);
             const nextFormattedEndDate = format(nextEndDate, 'yyyy-MM-dd');
 
             // TODO
-            const enable = false;
+            const enable = true;
             if (enable) {
               const result = await getYahooFinanceResult(otherFilters.ticker, startDate, nextFormattedEndDate);
               console.warn(result);
@@ -457,7 +458,7 @@ function isHoliday(date) {
   // Define holidays using month and day (MM-DD)
   const holidays = {
     '01-01': "New Year’s Day",
-    '01-15': "Birthday of Martin Luther King, Jr.",
+    '01-20': "Birthday of Martin Luther King, Jr.",
     '02-19': "Washington’s Birthday",
     '05-27': "Memorial Day",
     '06-19': "Juneteenth National Independence Day",

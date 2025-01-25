@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Op } = require("sequelize");
 
 const TransactionModel = {
     id: {
@@ -96,6 +96,42 @@ module.exports = {
     findAllTransactions: (query) => {
         return this.model.findAll({
             where: query
+        });
+    },
+
+    findAllTransactionsByMonth: (year, month, otherQueries = {}) => {
+        const startDate = new Date(year, month - 1, 1); // Month is 0-indexed
+        const endDate = new Date(year, month, 0); // Day 0 of next month gives last day of current month
+        console.log('findAllTransactionsByMonth > start date: ' + startDate + ' end date: ' + endDate);
+        const query = {
+            [Op.or]: {
+                openDate: { [Op.between]: [startDate, endDate] },
+                closeDate: { [Op.between]: [startDate, endDate] },
+            },
+            ...otherQueries // Spread the other queries *outside* the OR
+        };
+    
+        return this.model.findAll({
+            where: query,
+            distinct: true
+        });
+    },
+
+    findAllTransactionsByYear: (year,otherQueries = {}) => {
+        const startDate = new Date(year, 0, 1); // Month is 0-indexed
+        const endDate = new Date(year, 11, 31); // Day 0 of next month gives last day of current month
+        console.log('findAllTransactionsByMonth > start date: ' + startDate + ' end date: ' + endDate);
+        const query = {
+            [Op.or]: {
+                openDate: { [Op.between]: [startDate, endDate] },
+                closeDate: { [Op.between]: [startDate, endDate] },
+            },
+            ...otherQueries // Spread the other queries *outside* the OR
+        };
+    
+        return this.model.findAll({
+            where: query,
+            distinct: true
         });
     },
 

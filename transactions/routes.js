@@ -20,6 +20,12 @@ router.get(
 );
 
 router.get(
+  "/month",
+  //[isAuthenticatedMiddleware.check],
+  TransactionController.getAllTransactionsByMonth
+);
+
+router.get(
   "/tickers",
   //[isAuthenticatedMiddleware.check],
   TransactionController.getAllTickers
