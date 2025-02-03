@@ -16,7 +16,7 @@ module.exports = {
     const { query: filters } = req;
 
     if (filters.startDate === undefined && filters.endDate === undefined) {
-      const { date, ...otherFilters } = filters;
+      const { date, forceUpdate, ...otherFilters } = filters;
       // find last working day
       const currentDate = getLastWorkingDay(date);
       console.warn("last working day: " + currentDate);
@@ -24,7 +24,7 @@ module.exports = {
       QuoteModel.findAllQuotes(format(currentDate, 'yyyy-MM-dd'), otherFilters)
         .then(async (quotes) => {
           // check if quote is found in DB
-          if (quotes.length === 0) {
+          if (quotes.length === 0 || forceUpdate) {
 
             try {
               // use date + 1 as period2
@@ -478,6 +478,9 @@ function isHoliday(date) {
 function getLastWorkingDay(startDate) {
 
   let currentDate = parseISO(startDate);
+  if (!isWeekend(currentDate) && !isHoliday(currentDate)) {
+    return currentDate;
+  }
 
   for (let i = 1; i <= 7; i++) { // Check up to 7 days back (a full week)
     const previousDate = addDays(currentDate, -1);
