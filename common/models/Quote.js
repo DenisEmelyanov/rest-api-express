@@ -49,6 +49,12 @@ module.exports = {
         return this.model.create(quote);
     },
 
+    upsertQuote: (quote) => {
+        console.log('save quote:');
+        console.log(quote);
+        return this.model.upsert(quote);
+    },
+
     findLatestQuote: (ticker) => {
         console.log('find latest quote:');
         console.log(ticker);
@@ -129,6 +135,8 @@ module.exports = {
     // },    
 
     deleteQuote: (query) => {
+        console.log('delete quote:');
+        console.log(query);
         return this.model.destroy({
             where: query
         });

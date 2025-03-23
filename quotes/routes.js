@@ -54,7 +54,7 @@ router.post(
 );
 
 router.patch(
-  "/:ticker/:date",
+  "/",
   [
     //isAuthenticatedMiddleware.check,
     //CheckPermissionMiddleware.has(roles.ADMIN),
@@ -64,7 +64,7 @@ router.patch(
 );
 
 router.delete(
-  "/:ticker/:date",
+  "/",
   //[isAuthenticatedMiddleware.check, CheckPermissionMiddleware.has(roles.ADMIN)],
   QuoteController.deleteQuote
 );

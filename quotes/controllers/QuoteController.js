@@ -1,4 +1,4 @@
-const { ca, el } = require("date-fns/locale");
+const { ca, el, da } = require("date-fns/locale");
 const QuoteModel = require("../../common/models/Quote");
 const yahooFinance = require('yahoo-finance2').default;
 const dateFns = require('date-fns');
@@ -38,7 +38,7 @@ module.exports = {
 
               if (result && result.quotes.length > 0) {
 
-                const payload = saveQuotesInDB(result, quotes);
+                const payload = await saveQuotesInDB(result, quotes);
                 return res.status(200).json({
                   status: true,
                   data: payload
@@ -75,7 +75,7 @@ module.exports = {
         });
     }
     else {
-      const { startDate, endDate, ...otherFilters } = filters;
+      const { startDate, endDate, forceUpdate, ...otherFilters } = filters;
 
       QuoteModel.findAllQuotesBetweenDates(startDate, endDate, otherFilters)
         .then(async (quotes) => {
@@ -84,9 +84,9 @@ module.exports = {
           console.log(startDate + " " + endDate);
           const diff = workingDays - quotes.length;
           console.log("DB quotes: " + quotes.length + " <---> working days: " + workingDays + " (" + diff + ")");
-
+          console.log("force update: " + forceUpdate);
           // if the number of working days is greater than the number of quotes in the DB
-          if (diff > 0) {
+          if (quotes.length === 0 || forceUpdate === 'true') {
             const currentEndDate = parseISO(endDate);
             const nextEndDate = addDays(currentEndDate, 1);
             const nextFormattedEndDate = format(nextEndDate, 'yyyy-MM-dd');
@@ -97,7 +97,7 @@ module.exports = {
               const result = await getYahooFinanceResult(otherFilters.ticker, startDate, nextFormattedEndDate);
               console.warn(result);
 
-              const payload = saveQuotesInDB(result, quotes);
+              const payload = await saveQuotesInDB(result, quotes);
 
               return res.status(200).json({
                 status: true,
@@ -354,7 +354,8 @@ module.exports = {
       params: { ticker, date },
     } = req;
 
-    QuoteModel.deleteQuote({ ticker: ticker, date: date })
+    if (date === undefined) {
+      QuoteModel.deleteQuote({ ticker: ticker })
       .then((numberOfEntriesDeleted) => {
         return res.status(200).json({
           status: true,
@@ -369,6 +370,25 @@ module.exports = {
           error: err,
         });
       });
+    }
+    else {
+      QuoteModel.deleteQuote({ ticker: ticker, date: date })
+      .then((numberOfEntriesDeleted) => {
+        return res.status(200).json({
+          status: true,
+          data: {
+            numberOfQuotesDeleted: numberOfEntriesDeleted
+          },
+        });
+      })
+      .catch((err) => {
+        return res.status(500).json({
+          status: false,
+          error: err,
+        });
+      });
+    }
+    
   },
 };
 
@@ -382,51 +402,39 @@ async function getYahooFinanceResult(ticker, date1, date2) {
   return result;
 }
 
-function saveQuotesInDB(result, existingQuotes) {
+async function saveQuotesInDB(result, existingQuotes) {
   const payload = [];
   for (const quote of result.quotes) {
     const dateStr = format(new Date(quote.date), "yyyy-MM-dd");
     const ticker = result.meta.symbol;
 
-    const existingQuote = existingQuotes.find(
-      (existing) => existing.ticker === ticker && existing.date === dateStr
-    );
+    const payloadItem = {
+      ticker: ticker,
+      date: dateStr,
+      open: quote.open,
+      close: quote.close,
+      high: quote.high,
+      low: quote.low,
+      volume: quote.volume,
+    };
 
-    if (!existingQuote) {
-      const payloadCreateItem = {
-        ticker: ticker,
-        date: dateStr,
-        open: quote.open,
-        close: quote.close,
-        high: quote.high,
-        low: quote.low,
-        volume: quote.volume
-      };
-      console.log(payloadCreateItem);
+    try {
+      if (payloadItem.ticker !== undefined && payloadItem.date !== undefined) {
+        // Use upsert
+        const [updatedOrCreated, created] = await QuoteModel.upsertQuote(payloadItem);
 
-      try {
-        QuoteModel.createQuote(payloadCreateItem);
-      } catch (error) {
-        console.error("Error saving quote to DB:", error.message);
+        if (created) {
+          console.log(`Created new quote: ${ticker} - ${dateStr}`);
+        } else {
+          console.log(`Updated existing quote: ${ticker} - ${dateStr}`);
+        }
+
+        payload.push(payloadItem); // Add to payload regardless of create or update
       }
-      // QuoteModel.createQuote(payloadCreateItem);
-      payload.push(payloadCreateItem);
-    } else {
-      console.log(`Quote already exists in DB: ${ticker} - ${dateStr}`);
-
-      const payloadUpdateItem = { 
-        open: quote.open,
-        close: quote.close,
-        high: quote.high,
-        low: quote.low,
-        volume: quote.volume
-      };
-      QuoteModel.updateQuote({ ticker: ticker, date: dateStr }, payloadUpdateItem);
-      const payloadPushItem = { ticker: ticker, date: dateStr, ...payloadUpdateItem };
-      payload.push(payloadPushItem);
+    } catch (error) {
+      console.error("Error saving/updating quote to DB:", error.message);
     }
   }
-
   return payload;
 }
 
@@ -459,7 +467,7 @@ function isHoliday(date) {
   const holidays = {
     '01-01': "New Year’s Day",
     '01-20': "Birthday of Martin Luther King, Jr.",
-    '02-19': "Washington’s Birthday",
+    '02-17': "Presidents' Day",
     '05-27': "Memorial Day",
     '06-19': "Juneteenth National Independence Day",
     '07-04': "Independence Day",
